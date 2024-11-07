@@ -6,18 +6,96 @@
     <title>عرض بيانات LMS</title>
     <style>
 
-    body {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #111;
-            color: #fff;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            overflow-x: hidden;
-            transition: all 0.3s ease;
+    
+  body::before {
+    content: "0110101 0110101 0110101 0110101 0110101";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    color: #00ff00;
+    font-size: 20px;
+    padding: 20px;
+    z-index: -1;
+    opacity: 0.1; /* تأثر بخلفية الموقع */
+    animation: scrollText 1.5s linear infinite;
+}
+
+@keyframes scrollText {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(-100%);
+    }
+}
+
+        h1, h2, h3, p {
+            color: #00ff00;
         }
 
+        #password-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            border: 2px solid #00ff00;
+            background-color: #222;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+            text-align: center;
+            width: 300px;
+            z-index: 9999; /* اجعل شاشة كلمة المرور فوق جميع العناصر الأخرى */
+        }
 
+        input[type="password"] {
+            background-color: #333;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 10px;
+            font-size: 18px;
+            width: 80%;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        button {
+            background-color: #00ff00;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            color: #000;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #32cd32;
+        }
+
+        #content {
+    display: none; /* إخفاء المحتوى في البداية */
+    padding: 50px;
+    text-align: left;
+    font-size: 18px;
+    line-height: 1.6;
+    background-color: #1c1c1c;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+    width: 80%;
+    margin: 20px auto;
+}
+
+
+        .error {
+            color: #ff0000;
+            font-size: 14px;
+            margin-top: 10px;
+        }
 
 
         /* شريط البحث */
@@ -171,34 +249,43 @@
     </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1-crypto-js.js"></script>
     <script>
-        // كلمة المرور المشفرة (يتم تغييرها بعد حساب التشفير)
-        var correctPasswordHash = "f10f7a82bce244e8e340bd8bde5cbd04";  // هذا هو الـ SHA-256 لكلمة "moksha1999"
+       // كلمة المرور المشفرة (يتم تغييرها بعد حساب التشفير)
+var correctPasswordHash = "f10f7a82bce244e8e340bd8bde5cbd04";  // هذا هو الـ SHA-256 لكلمة "moksha1999"
 
-        // عدد المحاولات
-        var attempts = 3;
+// دالة للتحقق من كلمة المرور
+function checkPassword() {
+    var userPassword = document.getElementById("password").value;
 
-        // دالة للتحقق من كلمة المرور
-        function checkPassword() {
-            var userPassword = document.getElementById("password").value;
+    // تشفير كلمة المرور المدخلة باستخدام SHA-256
+    var userPasswordHash = CryptoJS.SHA256(userPassword).toString(CryptoJS.enc.Hex);
 
-            // تشفير كلمة المرور المدخلة باستخدام SHA-256
-            var userPasswordHash = CryptoJS.SHA256(userPassword).toString(CryptoJS.enc.Hex);
-
-            // تحقق من تطابق كلمة المرور المشفرة
-            if (userPasswordHash === correctPasswordHash) {
-                document.getElementById("password-container").style.display = "none";
-                document.getElementById("content").style.display = "block";
-            } else {
-                attempts--;
-                document.getElementById("error-message").innerText = "Incorrect password. You have " + attempts + " attempts left.";
-                if (attempts <= 0) {
-                    document.body.innerHTML = "<h1>Access Denied</h1><p>Your attempts are over. Access to the site is now denied.</p>";
-                }
-            }
+    // تحقق من تطابق كلمة المرور المشفرة
+    if (userPasswordHash === correctPasswordHash) {
+        document.getElementById("password-container").style.display = "none"; // إخفاء شاشة كلمة المرور
+        document.getElementById("content").style.display = "block"; // عرض المحتوى
+    } else {
+        attempts--;
+        document.getElementById("error-message").innerText = "Incorrect password. You have " + attempts + " attempts left.";
+        if (attempts <= 0) {
+            document.body.innerHTML = "<h1>Access Denied</h1><p>Your attempts are over. Access to the site is now denied.</p>";
         }
+    }
+}
+
+// متغير لعدد المحاولات المتاحة
+var attempts = 3;
+
     </script>
 </head>
 <body>
+   
+
+
+
+
+
+
+
     <!-- شاشة كلمة المرور -->
     <div id="password-container">
         <h1>Dark Web Login</h1>
@@ -214,6 +301,19 @@
         <p>Access granted. This is the hidden content of the dark web.</p>
         <p>Stay safe online.</p>
     </div>
+
+    <!-- تحميل مكتبة CryptoJS الخاصة بتشفير كلمة المرور -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1-crypto-js.js"></script>
+    <script src="script.js"></script> <!-- الرابط إلى ملف JavaScript الخارجي إذا أردت تحميله بشكل منفصل -->
+
+
+
+
+
+
+
+
+
     <div class="navbar">
         <input type="text" id="search" placeholder="بحث عن المستخدمين..." />
         <button id="highlightBtn">تلوين النتائج</button>
