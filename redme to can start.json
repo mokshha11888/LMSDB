@@ -1,0 +1,3 @@
+typing this onlay in terminal to start
+
+python -m http.server 8000
