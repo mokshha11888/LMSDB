@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض بيانات LMS</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #111;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            overflow-x: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* شريط البحث */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #222;
+            color: #33FF00;
+            padding: 15px;
+            z-index: 10;
+            text-align: center;
+            font-size: 18px;
+            box-shadow: 0 2px 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .navbar input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 70%;
+            max-width: 400px;
+            margin-right: 10px;
+            border: 2px solid #33FF00;
+            background-color: #333;
+            color: #33FF00;
+        }
+
+        .navbar button {
+            padding: 10px 20px;
+            background-color: #333;
+            color: #33FF00;
+            border: 2px solid #33FF00;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .navbar button:hover {
+            background-color: #00cc00;
+        }
+
+        .container {
+            margin-top: 80px; /* لضمان ترك مساحة أسفل شريط البحث */
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 30px;
+            color: #33FF00;
+            margin-bottom: 20px;
+        }
+
+        /* الجدول */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+            table-layout: fixed;
+            box-shadow: 0 2px 10px rgba(0, 255, 0, 0.3);
+            border: 1px solid #33FF00;
+            background-color: #0F0F0F;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #333;
+            text-align: center;
+            font-size: 16px;
+            color: #fff;
+            background-color: #222;
+            word-wrap: break-word;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        th {
+            background-color: #444;
+            font-weight: bold;
+            color: #33FF00;
+            border-bottom: 2px solid #33FF00;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #333;
+        }
+
+        tbody tr.hide {
+            display: none;
+        }
+
+        .results-count {
+            font-size: 16px;
+            color: #33FF00;
+            margin-top: 10px;
+        }
+
+        /* تثبيت الشريط العلوي */
+        thead {
+            position: sticky;
+            top: 80px; /* لضمان ترك مساحة لشريط البحث */
+            background-color: #111;
+            color: #33FF00;
+            z-index: 1;
+        }
+
+        th:nth-child(1), td:nth-child(1) {
+            position: sticky;
+            left: 0;
+            background-color: #111;
+            color: #33FF00;
+            z-index: 2;
+        }
+
+        /* تحسين مظهر شريط التمرير */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #33FF00;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #111;
+        }
+
+        /* تأثير توهج الهكر للنصوص الخضراء */
+        .highlight {
+            font-weight: bold;
+            color: #33FF00;
+            text-shadow: 0 0 10px #33FF00, 0 0 20px #33FF00, 0 0 30px #33FF00, 0 0 40px #00FF00;
+            animation: blink 1.5s infinite alternate;
+        }
+
+        /* تأثير الوميض على النصوص */
+        @keyframes blink {
+            0% {
+                color: #33FF00;
+            }
+            50% {
+                color: #00cc00;
+            }
+            100% {
+                color: #33FF00;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <input type="text" id="search" placeholder="بحث عن المستخدمين..." />
+        <button id="highlightBtn">تلوين النتائج</button>
+    </div>
+
+    <div class="container">
+        <h1>بيانات المستخدمين المستخرجة</h1>
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th>رقم المستخدم</th>
+                    <th>اسم المستخدم</th>
+                    <th>تفاصيل الملف الشخصي</th>
+                    <th>المواد المسجلة</th>
+                    <th>نشاط الدخول</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- البيانات سيتم إضافتها هنا ديناميكيًا -->
+            </tbody>
+        </table>
+        <div id="results-count" class="results-count"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch("data.json")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const tableBody = document.getElementById("data-table").querySelector("tbody");
+
+                    // تحضير البيانات بسرعة أكبر
+                    const rows = data.map(user => {
+                        if (user["User ID"] !== null && user["Name"] && user["User Details"] && user["Course Details"] && user["Login Activity"]) {
+                            const row = document.createElement("tr");
+                            row.innerHTML = `
+                                <td>${user["User ID"]}</td>
+                                <td>${user["Name"]}</td>
+                                <td>${user["User Details"]}</td>
+                                <td>${user["Course Details"]}</td>
+                                <td>${user["Login Activity"]}</td>
+                            `;
+                            return row;
+                        }
+                    }).filter(row => row); // تأكد من إضافة الصفوف الفارغة فقط عند وجود بيانات
+
+                    tableBody.append(...rows); // إضافة الصفوف دفعة واحدة
+
+                    const searchInput = document.getElementById("search");
+                    const highlightBtn = document.getElementById("highlightBtn");
+                    const resultsCount = document.getElementById("results-count");
+
+                    searchInput.addEventListener("input", () => {
+                        const searchValue = searchInput.value.toLowerCase();
+                        const rows = tableBody.querySelectorAll("tr");
+                        let matchCount = 0;
+
+                        rows.forEach(row => {
+                            const cells = row.querySelectorAll("td");
+                            let match = false;
+                            cells.forEach(cell => {
+                                if (cell.textContent.toLowerCase().includes(searchValue)) {
+                                    match = true;
+                                }
+                            });
+                            if (match) {
+                                row.classList.remove("hide");
+                                matchCount++;
+                            } else {
+                                row.classList.add("hide");
+                            }
+                        });
+
+                        resultsCount.textContent = `تم العثور على ${matchCount} نتيجة`;
+                    });
+
+                    highlightBtn.addEventListener("click", () => {
+                        const searchValue = searchInput.value.toLowerCase();
+                        const rows = tableBody.querySelectorAll("tr");
+
+                        rows.forEach(row => {
+                            const cells = row.querySelectorAll("td");
+                            cells.forEach(cell => {
+                                const cellText = cell.textContent.toLowerCase();
+                                if (cellText.includes(searchValue) && searchValue !== "") {
+                                    const highlightedText = cell.innerHTML.replace(new RegExp(searchValue, 'gi'), (match) => {
+                                        return `<span class="highlight">${match}</span>`;
+                                    });
+                                    cell.innerHTML = highlightedText;
+                                }
+                            });
+                        });
+                    });
+                })
+                .catch(error => console.error("Error loading data:", error));
+        });
+    </script>
+
+</body>
+</html>
