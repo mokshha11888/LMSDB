@@ -71,8 +71,8 @@
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1-crypto-js.js"></script>
     <script>
-        // كلمة المرور المشفرة (يتم تغييرها بعد حساب التشفير)
-        var correctPasswordHash = "f10f7a82bce244e8e340bd8bde5cbd04";  // تأكد من أن هذه هي القيمة المشفرة الصحيحة لكلمة "moksha1999"
+        // كلمة المرور المشفرة (تأكد من أنها صحيحة)
+        var correctPasswordHash = "f10f7a82bce244e8e340bd8bde5cbd04";  // كلمة "moksha1999" المشفرة بـ SHA-256
 
         // عدد المحاولات
         var attempts = 3;
@@ -84,12 +84,17 @@
             // تشفير كلمة المرور المدخلة باستخدام SHA-256
             var userPasswordHash = CryptoJS.SHA256(userPassword).toString(CryptoJS.enc.Hex);
 
+            // طباعة القيمة المشفرة لكلمة المرور المدخلة للتأكد من صحة التشفير
+            console.log("Hash Entered: " + userPasswordHash);
+
             // تحقق من تطابق كلمة المرور المشفرة
             if (userPasswordHash === correctPasswordHash) {
+                console.log("Password is correct!");  // التأكد من أن الدالة تعمل عند النجاح
                 document.getElementById("password-container").style.display = "none";
                 document.getElementById("content").style.display = "block";
             } else {
                 attempts--;
+                console.log("Incorrect password. Attempts left: " + attempts);  // طباعة عدد المحاولات
                 document.getElementById("error-message").innerText = "Incorrect password. You have " + attempts + " attempts left.";
                 if (attempts <= 0) {
                     document.body.innerHTML = "<h1>Access Denied</h1><p>Your attempts are over. Access to the site is now denied.</p>";
